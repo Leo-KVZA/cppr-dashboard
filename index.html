@@ -307,23 +307,41 @@ async function scanEntries(entries) {
   updateUI();
 }
 
-async function collectFromEntry(entry, result, clientName) {
+async function collectFromEntry(entry, result, clientName, depth) {
+  depth = depth || 0;
   if (entry.isFile) {
     const file = await new Promise((res, rej) => entry.file(res, rej));
     result.push({ file, client: clientName || guessClientFromFilename(file.name) });
   } else if (entry.isDirectory) {
-    // The folder name is the client name
     const reader = entry.createReader();
-    const subEntries = await new Promise((res, rej) => reader.readEntries(res, rej));
+    // readEntries may return results in batches — loop until empty
+    let subEntries = [];
+    while (true) {
+      const batch = await new Promise((res, rej) => reader.readEntries(res, rej));
+      if (!batch.length) break;
+      subEntries = subEntries.concat(batch);
+    }
     for (const sub of subEntries) {
-      await collectFromEntry(sub, result, entry.name);
+      // depth=0 : we are inside the dropped folder (e.g. "Client Data")
+      // depth=1 : we are inside a client subfolder (e.g. "Mustika") → use its name as client
+      // depth>=1 : keep the client name already set
+      const nextClient = depth === 0 ? null : (clientName || entry.name);
+      const nextDepth  = depth === 0 ? 1 : depth + 1;
+      // If sub is a directory at depth 0, its name is the client name
+      const subClient  = (sub.isDirectory && depth === 0) ? sub.name : nextClient;
+      await collectFromEntry(sub, result, subClient, nextDepth);
     }
   }
 }
 
 function guessClientFromPath(relPath, filename) {
-  // "Mustika/file.xlsx" → "Mustika"
-  if (relPath && relPath.includes('/')) return relPath.split('/')[0];
+  // "Client Data/Mustika/file.xlsx" → "Mustika" (second segment)
+  // "Mustika/file.xlsx" → "Mustika" (first segment)
+  if (relPath && relPath.includes('/')) {
+    const parts = relPath.split('/');
+    // If there are 3+ parts, the client is the second-to-last folder
+    return parts.length >= 3 ? parts[parts.length - 2] : parts[0];
+  }
   return guessClientFromFilename(filename);
 }
 function guessClientFromFilename(name) {
@@ -334,9 +352,23 @@ function guessClientFromFilename(name) {
   return parts.find(p => p.length > 2 && isNaN(p)) || 'Inconnu';
 }
 function guessPeriodFromFilename(name) {
-  const m = name.match(/(\d{4})[_\-](\d{2})/);
-  if (m) return m[1] + '-' + m[2];
+  // Handles: 2025_04_..., 2025-04_..., APR_2025_... etc.
+  const m = name.match(/(\d{4})[_\-](\d{2})/) || name.match(/(\d{2})[_\-](\d{4})/);
+  if (m) {
+    // Distinguish YYYY-MM vs MM-YYYY
+    const a = +m[1], b = +m[2];
+    if (a > 1900) return m[1] + '-' + m[2].padStart(2,'0');
+    if (b > 1900) return m[2] + '-' + m[1].padStart(2,'0');
+  }
   return null;
+}
+
+function periodLabel(period) {
+  if (!period || period === '—') return null;
+  const [y, mo] = period.split('-');
+  const months = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+  const idx = parseInt(mo,10) - 1;
+  return (months[idx] || mo) + ' ' + y;
 }
 
 function addFile(file, client) {
@@ -361,7 +393,7 @@ function updateUI() {
         <div class="client-dot" style="background:${color}"></div>
         <div>
           <div class="name">${file.name}</div>
-          <div class="meta">👤 ${client}${period ? '  📅 ' + period : ''}</div>
+          <div class="meta">👤 ${client}${period ? '  📅 ' + (periodLabel(period)||period) : ''}</div>
         </div>
       </div>
       <span style="color:var(--good);font-size:11px;">✓</span>
@@ -459,7 +491,7 @@ async function buildDashboard() {
   const selC = document.getElementById('sel-client');
   const selM = document.getElementById('sel-month');
   selC.innerHTML = '<option value="">Tous les clients</option>' + clients.map(c => `<option value="${c}">${c}</option>`).join('');
-  selM.innerHTML = '<option value="">Tous les mois</option>' + periods.map(p => `<option value="${p}">${p}</option>`).join('');
+  selM.innerHTML = '<option value="">Tous les mois</option>' + periods.map(p => `<option value="${p}">${periodLabel(p) || p}</option>`).join('');
 
   document.getElementById('drop-zone').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
@@ -494,7 +526,7 @@ function updateKPIs(rows, metrics, datasets) {
   document.getElementById('kpi-rns-max').textContent = fmtNum(metrics.maxRns);
   document.getElementById('kpi-elec').textContent    = fmtBig(metrics.totalElec);
   const clientNames = [...new Set(datasets.map(d => d.client))].join(', ');
-  const perds = [...new Set(datasets.map(d => d.period).filter(p=>p!=='—'))].join(', ');
+  const perds = [...new Set(datasets.map(d => d.period).filter(p=>p&&p!=='—'))].sort().map(p => periodLabel(p)||p).join(', ');
   document.getElementById('dash-title').textContent  = clientNames || 'Dashboard CPPR';
   document.getElementById('dash-period').textContent = perds ? '📅 ' + perds : '';
 }

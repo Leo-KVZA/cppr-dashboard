@@ -1470,7 +1470,7 @@ function renderComments(){
 // ═══════════════════════════════════════════════════
 function renderWeeklyTrend(){
   const weekly=getWeeklyForFilter();
-  const labels=weekly.map(w=>w.period.split('-').reverse().join('/')+' '+w.week);
+  const labels=weekly.map(w=>w.yearWeek||w.week);
   const wtCharts=[
     ['wt-load',{type:'bar',datasets:[
       {label:'Cooling Load (TR)',data:weekly.map(w=>+w.coolingLoad.toFixed(1)),backgroundColor:'rgba(59,130,246,.6)',borderRadius:3,yAxisID:'y'},

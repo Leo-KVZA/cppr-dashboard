@@ -503,7 +503,7 @@ async function parseFile(file,client){
         const wS=wb.Sheets['Weekly Breakdown Data'];
         if(wS){const wd=XLSX.utils.sheet_to_json(wS,{header:1,defval:null,raw:true});
           for(let i=1;i<wd.length;i++){const row=wd[i];if(!row[0])continue;
-            weekly.push({week:row[1]||('Sem '+i),plantEff:+row[9]||0,chillerEff:+row[10]||0,coolingLoad:+row[16]||0,rns:+row[0]||0})}}
+            weekly.push({week:row[1]||('Sem '+i),plantEff:+row[9]||0,chillerEff:+row[10]||0,coolingLoad:+row[17]||0})}}
 
         // Chiller Plant part-load
         let partloadPlant=[];
@@ -650,7 +650,7 @@ function renderMonthly(){
 
   // Energy share pies
   const chPlantPct=metrics.totalElec>0?(totalPlant/metrics.totalElec*100):0;
-  const otherPct=100-chPlantPct;
+  const otherPct=metrics.totalElec>0?((metrics.totalElec-totalPlant)/metrics.totalElec*100):0;
   destroyChart('energy-share');
   charts['energy-share']=new Chart(document.getElementById('chart-energy-share').getContext('2d'),{
     type:'doughnut',

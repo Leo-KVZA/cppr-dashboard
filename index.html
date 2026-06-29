@@ -301,23 +301,28 @@ tr:hover td{background:rgba(59,130,246,.04)}
   <div class="page" id="page-detailed">
     <div class="section-title">Efficiency Profile — This Month vs Last Month</div>
     <div class="chart-grid grid-2" style="margin-bottom:16px">
-      <div class="card">
-        <div class="card-head"><div class="card-title">Efficiency Comparison vs Last Month</div><div class="card-sub">Chiller + CHWP + CWP + CT + Aux (kW/TR)</div></div>
-        <div class="card-body"><div class="chart-h260"><canvas id="chart-eff-compare"></canvas></div></div>
+      <!-- LEFT: compare + KPI badges + waterfall -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Efficiency Comparison vs Last Month</div><div class="card-sub">Chiller + CHWP + CWP + CT + Aux (kW/TR)</div></div>
+          <div class="card-body"><div class="chart-h220"><canvas id="chart-eff-compare"></canvas></div></div>
+        </div>
+        <div id="eff-shift-kpis" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px"></div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">% share from Monthly Efficiency Shift</div></div>
+          <div class="card-body"><div class="chart-h180"><canvas id="chart-eff-shift"></canvas></div></div>
+        </div>
       </div>
-      <div class="card">
-        <div class="card-head"><div class="card-title">Efficacité journalière (kW/TR)</div><div class="card-sub">Évolution sur le mois</div></div>
-        <div class="card-body"><div class="chart-h260"><canvas id="chart-eff-daily"></canvas></div></div>
-      </div>
-    </div>
-    <div class="chart-grid grid-2">
-      <div class="card">
-        <div class="card-head"><div class="card-title">Chiller Plant Part Load Curve</div><div class="card-sub">Occurrence % + Efficiency kW/TR vs Part Load</div></div>
-        <div class="card-body"><div class="chart-h260"><canvas id="chart-partload"></canvas></div></div>
-      </div>
-      <div class="card">
-        <div class="card-head"><div class="card-title">CH 1 Part Load Curve</div><div class="card-sub">Occurrence % + Efficiency kW/TR</div></div>
-        <div class="card-body"><div class="chart-h260"><canvas id="chart-partload-ch1"></canvas></div></div>
+      <!-- RIGHT: part load charts -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Chiller Plant Part Load Curve</div><div class="card-sub">Occurrence % + Efficiency kW/TR vs Part Load</div></div>
+          <div class="card-body"><div class="chart-h260"><canvas id="chart-partload"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">CH 1 Part Load Curve</div><div class="card-sub">Occurrence % + Efficiency kW/TR</div></div>
+          <div class="card-body"><div class="chart-h260"><canvas id="chart-partload-ch1"></canvas></div></div>
+        </div>
       </div>
     </div>
   </div>

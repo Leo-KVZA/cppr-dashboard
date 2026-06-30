@@ -678,23 +678,52 @@ tr:hover td{background:rgba(10,61,124,.03)}
     <div class="section-title">Trending Analysis</div>
     <div class="chart-grid grid-2" style="margin-bottom:16px">
       <div class="card">
-        <div class="card-head"><div class="card-title">Electricity Usage Trend</div><div class="card-sub">Total Electricity vs RNS</div></div>
-        <div class="card-body"><div class="chart-h260"><canvas id="chart-trend-elec-rns"></canvas></div></div>
+        <div class="card-head"><div class="card-title">Cooling Load vs Plant Electricity</div><div class="card-sub" id="trend-sub-1"></div></div>
+        <div class="card-body"><div class="chart-h260"><canvas id="chart-trend-1"></canvas></div></div>
       </div>
       <div class="card">
-        <div class="card-head"><div class="card-title">Cooling Load (TRh) and RNS</div><div class="card-sub">Cooling Load vs RNS</div></div>
-        <div class="card-body"><div class="chart-h260"><canvas id="chart-trend-cooling-rns"></canvas></div></div>
+        <div class="card-head"><div class="card-title">Cooling Load vs Plant Efficiency</div><div class="card-sub" id="trend-sub-2"></div></div>
+        <div class="card-body"><div class="chart-h260"><canvas id="chart-trend-2"></canvas></div></div>
       </div>
     </div>
-    <div class="chart-grid grid-2">
+
+    <div class="section-title">Strongest Correlations Found</div>
+    <div class="chart-grid grid-2" style="margin-bottom:16px">
       <div class="card">
-        <div class="card-head"><div class="card-title">Energy Per Room vs RNS</div><div class="card-sub">kWh/RNS vs RNS</div></div>
-        <div class="card-body"><div class="chart-h260"><canvas id="chart-trend-epr-rns"></canvas></div></div>
+        <div class="card-head"><div class="card-title" id="trend-top1-title">Best Correlation #1</div><div class="card-sub" id="trend-top1-sub"></div></div>
+        <div class="card-body"><div class="chart-h260"><canvas id="chart-trend-top1"></canvas></div></div>
       </div>
       <div class="card">
-        <div class="card-head"><div class="card-title">Cooling Load vs Plant Efficiency</div><div class="card-sub">kW/TR vs TRh</div></div>
-        <div class="card-body"><div class="chart-h260"><canvas id="chart-trend-eff-cooling"></canvas></div></div>
+        <div class="card-head"><div class="card-title" id="trend-top2-title">Best Correlation #2</div><div class="card-sub" id="trend-top2-sub"></div></div>
+        <div class="card-body"><div class="chart-h260"><canvas id="chart-trend-top2"></canvas></div></div>
       </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head"><div class="card-title">All Variable Pairs Ranked by R²</div><div class="card-sub">Click a row to plot it below</div></div>
+      <div class="card-body" style="padding:0;max-height:280px;overflow-y:auto">
+        <table style="width:100%">
+          <thead><tr><th>Rank</th><th>X</th><th>Y</th><th>Best Model</th><th>R²</th></tr></thead>
+          <tbody id="trend-ranking-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-title">Custom Correlation</div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body" style="padding:16px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:8px">
+          <label style="font-size:11px;color:var(--muted);font-weight:600">X axis</label>
+          <select id="trend-x-axis" onchange="renderCustomTrend()" style="background:#fff;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 12px;font-size:12px"></select>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <label style="font-size:11px;color:var(--muted);font-weight:600">Y axis</label>
+          <select id="trend-y-axis" onchange="renderCustomTrend()" style="background:#fff;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 12px;font-size:12px"></select>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title" id="trend-custom-title">Custom Correlation</div><div class="card-sub" id="trend-custom-sub"></div></div>
+      <div class="card-body"><div class="chart-h300"><canvas id="chart-trend-custom"></canvas></div></div>
     </div>
   </div>
   <!-- PAGE: DAILY DATA -->
@@ -2022,77 +2051,199 @@ function regressionLabel(reg, xName='x', yName='y', decY=0, decX=0){
 }
 
 // ═══════════════════════════════════════════════════
-// TRENDING PAGE
+// TRENDING PAGE — universal metrics, works for any client
 // ═══════════════════════════════════════════════════
-function renderTrending(){
-  // Group by period, use filteredData
+
+// Build one row of universal metrics per period (works whether or not RNS exists)
+function buildTrendingRows(){
   const byPeriod={};
   for(const d of filteredData){
     if(!byPeriod[d.period])byPeriod[d.period]={period:d.period,billing:[],metrics:{}};
     byPeriod[d.period].billing.push(...d.billing);
     const m=d.metrics;const bm=byPeriod[d.period].metrics;
-    bm.rns=(bm.rns||0)+m.rns;bm.totalElec=(bm.totalElec||0)+m.totalElec;
+    bm.rns=(bm.rns||0)+(m.rns||0);
+    bm.totalElec=(bm.totalElec||0)+(m.totalElec||0);
+    bm.oldEff=m.oldEff||bm.oldEff;
   }
-  const pts=Object.values(byPeriod).filter(p=>p.period&&p.period!=='—'&&p.metrics.rns>0).sort((a,b)=>a.period.localeCompare(b.period));
-  const scatterOpts=(xl,yl)=>({
-    responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label||''}: (${c.parsed.x}, ${c.parsed.y})`}}},
-    scales:{
-      x:{title:{display:true,text:xl,color:'#64748b',font:{size:10}},ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(42,48,80,.5)'}},
-      y:{title:{display:true,text:yl,color:'#64748b',font:{size:10}},ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(42,48,80,.5)'}}
+  const periods=Object.values(byPeriod).filter(p=>p.period&&p.period!=='—').sort((a,b)=>a.period.localeCompare(b.period));
+  return periods.map(p=>{
+    const b=p.billing;
+    const cooling=b.reduce((s,r)=>s+r.cooling,0);
+    const chiller=b.reduce((s,r)=>s+r.chiller,0);
+    const chwp=b.reduce((s,r)=>s+r.chwp,0);
+    const cwp=b.reduce((s,r)=>s+r.cwp,0);
+    const ct=b.reduce((s,r)=>s+r.ct,0);
+    const aux=b.reduce((s,r)=>s+r.aux,0);
+    const totalPlant=b.reduce((s,r)=>s+r.totalPlant,0);
+    const plantEff=cooling>0?totalPlant/cooling:0;
+    const chillerEff=cooling>0?chiller/cooling:0;
+    const row={
+      period:p.period,
+      label:periodLabel(p.period)||p.period,
+      cooling, chiller, chwp, cwp, ct, aux, totalPlant, plantEff, chillerEff,
+      totalElec:p.metrics.totalElec||0,
+    };
+    if(p.metrics.rns>0){
+      row.rns=p.metrics.rns;
+      row.energyPerRoom=p.metrics.totalElec>0?p.metrics.totalElec/p.metrics.rns:0;
+      row.coolingPerRoom=p.metrics.rns>0?cooling/p.metrics.rns:0;
     }
+    return row;
   });
-  const scatterDS=(data,color)=>({
+}
+
+// Universal metric definitions — only show ones that have non-zero data
+const TREND_METRICS=[
+  {key:'cooling',label:'Cooling Load (TRh)'},
+  {key:'totalPlant',label:'Chiller Plant Power (kWh)'},
+  {key:'plantEff',label:'Plant Efficiency (kW/TR)'},
+  {key:'chillerEff',label:'Chiller Efficiency (kW/TR)'},
+  {key:'chiller',label:'Chiller Power (kWh)'},
+  {key:'chwp',label:'CHWP Power (kWh)'},
+  {key:'cwp',label:'CWP Power (kWh)'},
+  {key:'ct',label:'CT Power (kWh)'},
+  {key:'aux',label:'Aux Power (kWh)'},
+  {key:'totalElec',label:'Total Hotel Electricity (kWh)'},
+  {key:'rns',label:'Room Nights Sold (RNS)'},
+  {key:'energyPerRoom',label:'Energy per Room (kWh/RNS)'},
+  {key:'coolingPerRoom',label:'Cooling per Room (TRh/RNS)'},
+];
+
+function trendScatterOpts(xl,yl){
+  return{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label==='Trend'?'':`(${c.parsed.x}, ${c.parsed.y})`}}},
+    scales:{
+      x:{title:{display:true,text:xl,color:'#64748b',font:{size:10}},ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(209,217,230,.8)'}},
+      y:{title:{display:true,text:yl,color:'#64748b',font:{size:10}},ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(209,217,230,.8)'}}
+    }
+  };
+}
+function trendScatterDS(data,color){
+  return{type:'scatter',data,backgroundColor:color,pointRadius:6,pointHoverRadius:8,pointStyle:'circle'};
+}
+
+function renderSingleTrendChart(canvasId, subId, rows, xKey, yKey, xLabel, yLabel, color){
+  destroyChart(canvasId);
+  const pts=rows.filter(r=>typeof r[xKey]==='number'&&typeof r[yKey]==='number'&&!isNaN(r[xKey])&&!isNaN(r[yKey])).map(r=>({x:+r[xKey].toFixed(4),y:+r[yKey].toFixed(4)}));
+  const subEl=document.getElementById(subId);
+  const canvas=document.getElementById(canvasId);
+  if(!canvas)return null;
+  if(pts.length<2){
+    if(subEl) subEl.textContent='Not enough data points';
+    return null;
+  }
+  const fit=bestFitDataset(pts,color);
+  if(subEl) subEl.textContent=fit?`${fit.fit.label} · R² = ${fit.fit.r2.toFixed(3)}`:'';
+  charts[canvasId]=new Chart(canvas.getContext('2d'),{
     type:'scatter',
-    data:data,
-    backgroundColor:color,
-    pointRadius:6,
-    pointHoverRadius:8,
-    pointStyle:'circle',
+    data:{datasets:[{...trendScatterDS(pts,color),label:'Data'},...(fit?[fit.dataset]:[])]},
+    options:trendScatterOpts(xLabel,yLabel)
   });
-  // 1. Total Electricity vs RNS
-  destroyChart('trend-elec-rns');
-  const pts1=pts.map(p=>({x:p.metrics.rns,y:p.metrics.totalElec}));
-  const fit1=bestFitDataset(pts1,'rgba(59,130,246,.6)');
-  document.querySelector('#chart-trend-elec-rns').closest('.card').querySelector('.card-sub').textContent=fit1?`${fit1.fit.label} · R² = ${fit1.fit.r2.toFixed(3)}`:'';
-  charts['trend-elec-rns']=new Chart(document.getElementById('chart-trend-elec-rns').getContext('2d'),{
-    type:'scatter',
-    data:{datasets:[
-      {...scatterDS(pts1,'#3b82f6'),label:'Total Electricity',datalabels:{display:false}},
-      ...(fit1?[fit1.dataset]:[])
-    ]},
-    options:{...scatterOpts('RNS','Total Electricity (kWh)'),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label==='Trend'?'':(`${pts[c.dataIndex]?periodLabel(pts[c.dataIndex].period):''}: RNS=${c.parsed.x}, Elec=${Math.round(c.parsed.y)}`)}},annotation:{}}},
-  });
-  // 2. Cooling Load vs RNS
-  destroyChart('trend-cooling-rns');
-  const pts2=pts.map(p=>({x:p.metrics.rns,y:p.billing.reduce((s,r)=>s+r.cooling,0)}));
-  const fit2=bestFitDataset(pts2,'rgba(6,182,212,.6)');
-  document.querySelector('#chart-trend-cooling-rns').closest('.card').querySelector('.card-sub').textContent=fit2?`${fit2.fit.label} · R² = ${fit2.fit.r2.toFixed(3)}`:'';
-  charts['trend-cooling-rns']=new Chart(document.getElementById('chart-trend-cooling-rns').getContext('2d'),{
-    type:'scatter',
-    data:{datasets:[{...scatterDS(pts2,'#06b6d4'),label:'Cooling vs RNS'},...(fit2?[fit2.dataset]:[])]},
-    options:{...scatterOpts('RNS','Cooling Load (TRh)'),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label==='Trend'?'':`${pts[c.dataIndex]?periodLabel(pts[c.dataIndex].period):''}: RNS=${c.parsed.x}, Cooling=${Math.round(c.parsed.y)}`}}}}
-  });
-  // 3. Energy Per Room vs RNS
-  destroyChart('trend-epr-rns');
-  const pts3=pts.map(p=>({x:p.metrics.rns,y:p.metrics.rns>0?+(p.metrics.totalElec/p.metrics.rns).toFixed(2):0}));
-  const fit3=bestFitDataset(pts3,'rgba(139,92,246,.6)');
-  document.querySelector('#chart-trend-epr-rns').closest('.card').querySelector('.card-sub').textContent=fit3?`${fit3.fit.label} · R² = ${fit3.fit.r2.toFixed(3)}`:'';
-  charts['trend-epr-rns']=new Chart(document.getElementById('chart-trend-epr-rns').getContext('2d'),{
-    type:'scatter',
-    data:{datasets:[{...scatterDS(pts3,'#8b5cf6'),label:'EPR vs RNS'},...(fit3?[fit3.dataset]:[])]},
-    options:{...scatterOpts('RNS','Energy Per Room (kWh/RNS)'),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label==='Trend'?'':`${pts[c.dataIndex]?periodLabel(pts[c.dataIndex].period):''}: RNS=${c.parsed.x}, EPR=${c.parsed.y}`}}}}
-  });
-  // 4. Cooling Load vs Plant Efficiency
-  destroyChart('trend-eff-cooling');
-  const pts4=pts.map(p=>{const b=p.billing;const tc=b.reduce((s,r)=>s+r.cooling,0);const tp=b.reduce((s,r)=>s+r.totalPlant,0);return{x:Math.round(tc),y:tc>0?+(tp/tc).toFixed(4):0};});
-  const fit4=bestFitDataset(pts4,'rgba(16,185,129,.6)');
-  document.querySelector('#chart-trend-eff-cooling').closest('.card').querySelector('.card-sub').textContent=fit4?`${fit4.fit.label} · R² = ${fit4.fit.r2.toFixed(3)}`:'';
-  charts['trend-eff-cooling']=new Chart(document.getElementById('chart-trend-eff-cooling').getContext('2d'),{
-    type:'scatter',
-    data:{datasets:[{...scatterDS(pts4,'#10b981'),label:'Eff vs Cooling'},...(fit4?[fit4.dataset]:[])]},
-    options:{...scatterOpts('Cooling Load (TRh)','Plant Efficiency (kW/TR)'),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label==='Trend'?'':`${pts[c.dataIndex]?periodLabel(pts[c.dataIndex].period):''}: Cooling=${c.parsed.x}, Eff=${c.parsed.y}`}}}}
-  });
+  return fit;
+}
+
+// Test every pair of available metrics and rank by R²
+function computeAllCorrelations(rows, availableMetrics){
+  const results=[];
+  for(let i=0;i<availableMetrics.length;i++){
+    for(let j=0;j<availableMetrics.length;j++){
+      if(i===j)continue;
+      const xKey=availableMetrics[i].key, yKey=availableMetrics[j].key;
+      const pts=rows.filter(r=>typeof r[xKey]==='number'&&typeof r[yKey]==='number'&&!isNaN(r[xKey])&&!isNaN(r[yKey])).map(r=>({x:r[xKey],y:r[yKey]}));
+      if(pts.length<3)continue; // need at least 3 points for meaningful fit
+      const fit=bestFit(pts);
+      if(!fit||isNaN(fit.r2))continue;
+      results.push({xKey,yKey,xLabel:availableMetrics[i].label,yLabel:availableMetrics[j].label,fit,pts});
+    }
+  }
+  // Dedupe symmetric pairs (X vs Y and Y vs X are the same relationship) — keep the one with the higher R² or just keep first occurrence
+  const seen=new Set();
+  const deduped=[];
+  for(const r of results.sort((a,b)=>b.fit.r2-a.fit.r2)){
+    const pairKey=[r.xKey,r.yKey].sort().join('|');
+    if(seen.has(pairKey))continue;
+    seen.add(pairKey);
+    deduped.push(r);
+  }
+  return deduped;
+}
+
+function renderTrending(){
+  const rows=buildTrendingRows();
+
+  // ── Default chart 1: Cooling Load vs Plant Electricity (always available) ──
+  renderSingleTrendChart('chart-trend-1','trend-sub-1',rows,'cooling','totalPlant','Cooling Load (TRh)','Chiller Plant Power (kWh)','#3b82f6');
+
+  // ── Default chart 2: Cooling Load vs Plant Efficiency (always available) ──
+  renderSingleTrendChart('chart-trend-2','trend-sub-2',rows,'cooling','plantEff','Cooling Load (TRh)','Plant Efficiency (kW/TR)','#10b981');
+
+  // ── Populate X/Y selectors with metrics that have data ──
+  const availableMetrics=TREND_METRICS.filter(m=>rows.some(r=>typeof r[m.key]==='number'&&!isNaN(r[m.key])&&r[m.key]!==0));
+  const selX=document.getElementById('trend-x-axis');
+  const selY=document.getElementById('trend-y-axis');
+  if(selX&&selY){
+    const prevX=selX.value, prevY=selY.value;
+    const optsHtml=availableMetrics.map(m=>`<option value="${m.key}">${m.label}</option>`).join('');
+    selX.innerHTML=optsHtml;
+    selY.innerHTML=optsHtml;
+    if(availableMetrics.find(m=>m.key===prevX)) selX.value=prevX;
+    else selX.value=availableMetrics[0]?.key||'';
+    const defaultY=availableMetrics.find(m=>m.key==='rns')?'rns':(availableMetrics.find(m=>m.key==='totalElec')?'totalElec':availableMetrics[1]?.key);
+    if(availableMetrics.find(m=>m.key===prevY)) selY.value=prevY;
+    else selY.value=defaultY||availableMetrics[0]?.key||'';
+  }
+
+  // ── Find best correlations across all metric pairs ──
+  const ranked=computeAllCorrelations(rows, availableMetrics);
+
+  // Top 2 charts
+  if(ranked[0]){
+    const r=ranked[0];
+    document.getElementById('trend-top1-title').textContent=`${r.yLabel} vs ${r.xLabel}`;
+    renderSingleTrendChart('chart-trend-top1','trend-top1-sub',rows,r.xKey,r.yKey,r.xLabel,r.yLabel,'#d97706');
+  }
+  if(ranked[1]){
+    const r=ranked[1];
+    document.getElementById('trend-top2-title').textContent=`${r.yLabel} vs ${r.xLabel}`;
+    renderSingleTrendChart('chart-trend-top2','trend-top2-sub',rows,r.xKey,r.yKey,r.xLabel,r.yLabel,'#ec4899');
+  }
+
+  // Ranking table — all pairs
+  const tbody=document.getElementById('trend-ranking-body');
+  if(tbody){
+    tbody.innerHTML=ranked.map((r,i)=>`
+      <tr style="cursor:pointer" onclick="selectCustomTrend('${r.xKey}','${r.yKey}')">
+        <td>${i+1}</td>
+        <td>${r.xLabel}</td>
+        <td>${r.yLabel}</td>
+        <td style="text-transform:capitalize">${r.fit.type}</td>
+        <td style="font-weight:700;color:${r.fit.r2>0.7?'var(--good)':r.fit.r2>0.4?'var(--warn)':'var(--muted)'}">${r.fit.r2.toFixed(3)}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">Not enough data for correlation analysis</td></tr>';
+  }
+
+  renderCustomTrend(rows);
+}
+
+function selectCustomTrend(xKey,yKey){
+  document.getElementById('trend-x-axis').value=xKey;
+  document.getElementById('trend-y-axis').value=yKey;
+  renderCustomTrend();
+  document.getElementById('chart-trend-custom').closest('.card').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function renderCustomTrend(rowsArg){
+  const rows=rowsArg||buildTrendingRows();
+  const selX=document.getElementById('trend-x-axis');
+  const selY=document.getElementById('trend-y-axis');
+  if(!selX||!selY||!selX.value||!selY.value)return;
+  const xKey=selX.value, yKey=selY.value;
+  const xMeta=TREND_METRICS.find(m=>m.key===xKey);
+  const yMeta=TREND_METRICS.find(m=>m.key===yKey);
+  const titleEl=document.getElementById('trend-custom-title');
+  if(titleEl) titleEl.textContent=`${yMeta?.label||yKey} vs ${xMeta?.label||xKey}`;
+  renderSingleTrendChart('chart-trend-custom','trend-custom-sub',rows,xKey,yKey,xMeta?.label||xKey,yMeta?.label||yKey,'#7c3aed');
 }
 
 // ═══════════════════════════════════════════════════

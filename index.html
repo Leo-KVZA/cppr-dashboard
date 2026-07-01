@@ -2644,49 +2644,83 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 2
 
 <div id="page-monthly" class="page active">
   <div class="section-title">Cooling as a Service — Project Parameters</div>
-  <div class="kpi-grid" id="kpi-main" style="margin-bottom:20px"></div>
-  <div class="ashrae-wrap" id="ashrae-wrap">
-    <div style="font-size:11px;font-weight:700;color:var(--ses-blue);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">ASHRAE Chiller Plant Efficiency Benchmark</div>
-    <div id="ashrae-label" style="font-size:11px;color:var(--muted);margin-bottom:6px"></div>
-    <div class="ashrae-track"><div id="ashrae-bar" class="ashrae-bar"></div></div>
-    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px">
-      <span>0.5</span><span>0.7</span><span>0.9</span><span>1.1</span><span>1.2</span>
-    </div>
-  </div>
-  <div class="chart-grid grid-2" style="margin-bottom:16px">
-    <div class="card">
-      <div class="card-head"><div class="card-title">Cooling Load &amp; Plant Efficiency — Weekly</div><div class="card-sub">Cooling Load (TR) + Plant Eff (kW/TR) + Chiller Eff (kW/TR)</div></div>
-      <div class="card-body"><div class="chart-h260"><canvas id="chart-weekly"></canvas></div></div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:16px">
+  <div class="kpi-grid" id="kpi-main" style="margin-bottom:16px"></div>
+
+  <div style="margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px">
+      <div>
+        <div class="ashrae-wrap">
+          <div class="ashrae-title">ASHRAE Chiller Plant Efficiency Benchmark</div>
+          <div class="ashrae-bar">
+            <div class="ashrae-seg" style="background:#1a6b3a">EXCELLENT</div>
+            <div class="ashrae-seg" style="background:#2d8a4e">GOOD</div>
+            <div class="ashrae-seg" style="background:#d97706">FAIR</div>
+            <div class="ashrae-seg" style="background:#dc2626">NEED IMP.</div>
+          </div>
+          <div class="ashrae-needle-wrap"><div class="ashrae-needle" id="ashrae-needle" style="left:50%"></div></div>
+          <div class="ashrae-labels"><span>0.5</span><span>0.7</span><span>0.9</span><span>1.1</span><span>1.2</span></div>
+          <div class="ashrae-value blue" id="ashrae-val">—</div>
+          <div class="ashrae-zone" id="ashrae-zone"></div>
+        </div>
+        <div class="kpi-grid" id="kpi-hotel" style="margin-bottom:0;grid-template-columns:repeat(4,1fr)"></div>
+      </div>
       <div class="card">
-        <div class="card-head"><div class="card-title">Energy Share</div><div class="card-sub">Chiller Plant vs Total Hotel</div></div>
-        <div class="card-body"><div class="chart-h320"><canvas id="chart-energy-share"></canvas></div></div>
+        <div class="card-head">
+          <div><div class="card-title">Tonnage of Cooling & Plant Efficiency — Weekly</div><div class="card-sub">Cooling Load (TR) + Plant Eff (kW/TR) + Chiller Eff (kW/TR)</div></div>
+          <span class="tag tag-blue">Weekly</span>
+        </div>
+        <div class="card-body"><div class="chart-h260"><canvas id="chart-weekly"></canvas></div></div>
       </div>
     </div>
   </div>
-  <div class="card">
-    <div class="card-head"><div class="card-title">Cooling Load &amp; Consumption — Daily</div><div class="card-sub">TRh vs kWh chiller plant</div></div>
-    <div class="card-body"><div class="chart-h220"><canvas id="chart-daily"></canvas></div></div>
+
+  <div class="chart-grid grid-2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-head"><div class="card-title">Energy Share</div><div class="card-sub">Chiller Plant vs Total Hotel</div></div>
+      <div class="card-body"><div class="chart-h320"><canvas id="chart-energy-share"></canvas></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Chiller Plant Energy Share</div><div class="card-sub">Internal Breakdown</div></div>
+      <div class="card-body"><div class="chart-h320"><canvas id="chart-plant-share"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-head">
+      <div><div class="card-title">Cooling Load & Consumption — Daily Evolution</div><div class="card-sub">TRh vs kWh chiller plant</div></div>
+      <span class="tag tag-blue">Billing Data</span>
+    </div>
+    <div class="card-body"><div class="chart-h220"><canvas id="chart-load"></canvas></div></div>
   </div>
 </div>
 
 <div id="page-yearly" class="page">
-  <div class="section-title">Accumulated Project Stats</div>
-  <div class="kpi-grid" id="kpi-yearly" style="margin-bottom:20px"></div>
   <div class="chart-grid grid-2" style="margin-bottom:16px">
-    <div class="card">
-      <div class="card-head"><div class="card-title">Yearly Performance Trends</div><div class="card-sub">Cooling Load + Plant Efficiency</div></div>
-      <div class="card-body"><div class="chart-h260"><canvas id="chart-yearly-trend"></canvas></div></div>
+    <div>
+      <div class="section-title">Accumulated Project Stats</div>
+      <div class="kpi-grid" id="kpi-yearly"></div>
     </div>
-    <div class="card">
-      <div class="card-head"><div class="card-title">Monthly Electricity</div><div class="card-sub">RNS &amp; Total Electricity per Month</div></div>
-      <div class="card-body"><div class="chart-h260"><canvas id="chart-yearly-elec"></canvas></div></div>
+    <div>
+      <div class="section-title">Yearly Performance Trends</div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">RNS & Total Electricity per Month</div></div>
+        <div class="card-body"><div class="chart-h180"><canvas id="chart-yearly-rns"></canvas></div></div>
+      </div>
     </div>
   </div>
-  <div id="comments-section" class="card" style="display:none">
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-head"><div class="card-title">Cooling Load (TRh) + Plant Efficiency + Chiller Efficiency — per Month</div></div>
+    <div class="card-body"><div class="chart-h220"><canvas id="chart-yearly-load"></canvas></div></div>
+  </div>
+  <div class="card" id="card-yearly-room" style="margin-bottom:16px">
+    <div class="card-head"><div class="card-title">Cooling per Room & Energy per Room — per Month</div></div>
+    <div class="card-body"><div class="chart-h180"><canvas id="chart-yearly-room"></canvas></div></div>
+  </div>
+  <div class="card">
     <div class="card-head"><div class="card-title">General Comments</div></div>
-    <div class="card-body" id="comments-list" style="font-size:13px;line-height:2;color:var(--label)"></div>
+    <div class="card-body">
+      <div id="comments-list" style="font-size:12px;color:var(--label);line-height:1.8"></div>
+    </div>
   </div>
 </div>
 
@@ -2753,49 +2787,71 @@ function renderMonthly(){
   if(!rows.length)return;
   const totalCooling=rows.reduce((s,r)=>s+r.cooling,0);
   const totalPlant=rows.reduce((s,r)=>s+r.totalPlant,0);
-  const totalChiller=rows.reduce((s,r)=>s+r.chiller,0);
-  const plantEff=totalCooling>0?totalPlant/totalCooling:0;
-  const metrics=filteredData.length>0?filteredData[filteredData.length-1].metrics:{};
-  const totalElecSavings=Math.max(0,((metrics.oldEff||0)-plantEff)*totalCooling);
-  const totalCO2=totalElecSavings*(metrics.emissionFactor||0.84)/1000;
-  const trees=Math.round(totalCO2*50);
+  const avgEff=totalCooling>0?totalPlant/totalCooling:0;
+  // aggregate metrics across all filtered periods
+  const metrics={rns:0,maxRns:0,totalElec:0,oldEff:0,emissionFactor:0.84};
+  for(const d of filteredData){
+    metrics.rns+=d.metrics.rns||0;
+    metrics.maxRns+=d.metrics.maxRns||0;
+    metrics.totalElec+=d.metrics.totalElec||0;
+    if(d.metrics.oldEff) metrics.oldEff=d.metrics.oldEff;
+    if(d.metrics.emissionFactor) metrics.emissionFactor=d.metrics.emissionFactor;
+  }
+  const elecSavings=Math.max(0,(metrics.oldEff-avgEff)*totalCooling);
+  const co2=elecSavings*(metrics.emissionFactor||0.84)/1000;
+  const trees=Math.round(co2*50);
   const coolingPerRoom=metrics.rns>0?totalCooling/metrics.rns:0;
-  const energyPerRoom=metrics.rns>0&&metrics.totalElec>0?metrics.totalElec/metrics.rns:0;
+  const energyPerRoom=metrics.rns>0?metrics.totalElec/metrics.rns:0;
 
   document.getElementById('kpi-main').innerHTML=
-    '<div class="kpi"><div class="kpi-label">Cooling Produced</div><div class="kpi-value blue">'+fmtNum(totalCooling)+'</div><div class="kpi-unit">TRh</div></div>'+
-    '<div class="kpi"><div class="kpi-label">Chiller Plant Electricity</div><div class="kpi-value cyan">'+fmtNum(totalPlant)+'</div><div class="kpi-unit">kWh</div></div>'+
-    '<div class="kpi"><div class="kpi-label">Electricity Savings</div><div class="kpi-value green">'+fmtNum(totalElecSavings)+'</div><div class="kpi-unit">kWh</div></div>'+
-    '<div class="kpi"><div class="kpi-label">Carbon Savings</div><div class="kpi-value green">'+fmt4(totalCO2)+'</div><div class="kpi-unit">Tons CO₂e</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Cooling Produced</div><div class="kpi-value blue">'+fmt4(totalCooling)+'</div><div class="kpi-unit">TRh</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Chiller Plant Electricity</div><div class="kpi-value cyan">'+fmt4(totalPlant)+'</div><div class="kpi-unit">kWh</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Electricity Savings</div><div class="kpi-value green">'+fmt4(elecSavings)+'</div><div class="kpi-unit">kWh</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Carbon Savings</div><div class="kpi-value green">'+fmt4(co2)+'</div><div class="kpi-unit">Tons of CO₂e</div></div>'+
     '<div class="kpi"><div class="kpi-label">Trees Planted Equiv.</div><div class="kpi-value green">'+fmtNum(trees)+'</div><div class="kpi-unit">Trees 🌳</div></div>'+
-    '<div class="kpi"><div class="kpi-label">Old System Eff.</div><div class="kpi-value warn">'+fmt4(metrics.oldEff||0)+'</div><div class="kpi-unit">kW/TR</div></div>'+
-    '<div class="kpi"><div class="kpi-label">Current Plant Eff.</div><div class="kpi-value purple">'+fmt4(plantEff)+'</div><div class="kpi-unit">kW/TR</div></div>'+
-    (metrics.rns>0?'<div class="kpi"><div class="kpi-label">Room Nights Sold</div><div class="kpi-value">'+fmtNum(metrics.rns)+'</div><div class="kpi-unit">RNS / Max '+fmtNum(metrics.maxRns)+'</div></div>'+
-    '<div class="kpi"><div class="kpi-label">Cooling / Room</div><div class="kpi-value">'+fmt4(coolingPerRoom)+'</div><div class="kpi-unit">TRh/RNS</div></div>'+
-    '<div class="kpi"><div class="kpi-label">Energy / Room</div><div class="kpi-value">'+fmt4(energyPerRoom)+'</div><div class="kpi-unit">kWh/RNS</div></div>':'');
+    '<div class="kpi"><div class="kpi-label">Old System Eff.</div><div class="kpi-value warn">'+fmt4(metrics.oldEff)+'</div><div class="kpi-unit">kW/TR</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Current Plant Eff.</div><div class="kpi-value purple">'+fmt4(avgEff)+'</div><div class="kpi-unit">kW/TR</div></div>';
+
+  const hotelEl=document.getElementById('kpi-hotel');
+  if(metrics.rns>0){
+    hotelEl.style.display='grid';
+    hotelEl.innerHTML=
+      '<div class="kpi"><div class="kpi-label">Room Nights Sold</div><div class="kpi-value">'+fmtNum(metrics.rns)+'</div><div class="kpi-unit">RNS / Max '+fmtNum(metrics.maxRns)+'</div></div>'+
+      '<div class="kpi"><div class="kpi-label">Total Electricity</div><div class="kpi-value">'+fmt4(metrics.totalElec)+'</div><div class="kpi-unit">kWh</div></div>'+
+      '<div class="kpi"><div class="kpi-label">Cooling / Room</div><div class="kpi-value">'+fmt4(coolingPerRoom)+'</div><div class="kpi-unit">TRh/RNS</div></div>'+
+      '<div class="kpi"><div class="kpi-label">Energy / Room</div><div class="kpi-value">'+fmt4(energyPerRoom)+'</div><div class="kpi-unit">kWh/RNS</div></div>';
+  } else {
+    hotelEl.style.display='none';
+    hotelEl.innerHTML='';
+  }
 
   // ASHRAE gauge
-  const eff=plantEff;
-  const zones=[{max:0.7,color:'#2d8a4e',label:'EXCELLENT'},{max:0.9,color:'#16a34a',label:'GOOD'},{max:1.1,color:'#d97706',label:'FAIR'},{max:1.2,color:'#dc2626',label:'NEED IMP.'}];
-  const zone=zones.find(z=>eff<=z.max)||zones[zones.length-1];
-  const pct=Math.min(((eff-0.5)/(1.2-0.5))*100,100);
-  document.getElementById('ashrae-label').innerHTML='<strong>'+fmt4(eff)+' kW/TR</strong> — <span style="color:'+zone.color+';font-weight:700">'+zone.label+'</span>';
-  document.getElementById('ashrae-bar').style.cssText='width:'+pct+'%;background:'+zone.color;
+  const eff=avgEff;
+  const pct=Math.min(100,Math.max(0,(eff-0.5)/(1.2-0.5)*100));
+  document.getElementById('ashrae-needle').style.left=pct+'%';
+  document.getElementById('ashrae-val').textContent=fmt4(eff)+' kW/TR';
+  let zone='',zcolor='';
+  if(eff<0.7){zone='EXCELLENT';zcolor='#1a6b3a'}
+  else if(eff<0.9){zone='GOOD';zcolor='#2d8a4e'}
+  else if(eff<1.1){zone='FAIR';zcolor='#d97706'}
+  else{zone='NEED IMPROVEMENT';zcolor='#dc2626'}
+  const zEl=document.getElementById('ashrae-zone');
+  zEl.textContent=zone;zEl.style.color=zcolor;
 
   // Weekly chart
-  const weekly=filteredData.slice().sort((a,b)=>a.period.localeCompare(b.period)).flatMap(d=>d.weekly);
+  const allWeekly=filteredData.slice().sort((a,b)=>a.period.localeCompare(b.period)).flatMap(d=>d.weekly);
   destroyChart('weekly');
-  if(weekly.length){
+  if(allWeekly.length){
     charts['weekly']=new Chart(document.getElementById('chart-weekly').getContext('2d'),{
-      type:'bar',data:{labels:weekly.map(w=>w.yearWeek||w.week),datasets:[
-        {label:'Cooling Load (TR)',data:weekly.map(w=>+w.coolingLoad.toFixed(1)),backgroundColor:'rgba(59,130,246,.5)',borderRadius:3,yAxisID:'y'},
-        {label:'Plant Eff (kW/TR)',data:weekly.map(w=>+w.plantEff.toFixed(4)),type:'line',borderColor:'#2d8a4e',pointRadius:3,borderWidth:2,fill:false,yAxisID:'y2'},
-        {label:'Chiller Eff (kW/TR)',data:weekly.map(w=>+w.chillerEff.toFixed(4)),type:'line',borderColor:'#d97706',pointRadius:3,borderWidth:2,fill:false,yAxisID:'y2'},
+      type:'bar',data:{labels:allWeekly.map(w=>(w.period?w.period.split('-').reverse().join('/'):'')+' '+w.week),datasets:[
+        {label:'Cooling Load (TR)',data:allWeekly.map(w=>+w.coolingLoad.toFixed(1)),backgroundColor:'rgba(59,130,246,.6)',borderRadius:4,yAxisID:'y'},
+        {label:'Plant Eff (kW/TR)',data:allWeekly.map(w=>+w.plantEff.toFixed(4)),type:'line',borderColor:'#10b981',pointRadius:4,borderWidth:2,fill:false,yAxisID:'y2'},
+        {label:'Chiller Eff (kW/TR)',data:allWeekly.map(w=>+w.chillerEff.toFixed(4)),type:'line',borderColor:'#f59e0b',pointRadius:4,borderWidth:2,fill:false,yAxisID:'y2'},
       ]},options:chartOpts({y:'TR',y2:'kW/TR',y2right:true})
     });
   }
 
-  // Energy share donut
+  // Energy share donuts
   const chPlantPct=metrics.totalElec>0?(totalPlant/metrics.totalElec*100):0;
   const otherPct=metrics.totalElec>0?((metrics.totalElec-totalPlant)/metrics.totalElec*100):0;
   destroyChart('energy-share');
@@ -2803,13 +2859,24 @@ function renderMonthly(){
     type:'doughnut',data:{labels:['Chiller Plant','Other'],datasets:[{data:[+chPlantPct.toFixed(2),+otherPct.toFixed(2)],backgroundColor:['#0a3d7c','#cbd5e1'],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:'#4a5568',font:{size:12},padding:14,boxWidth:14}},tooltip:{callbacks:{label:c=>c.label+': '+c.raw+'%'}}}}
   });
+  destroyChart('plant-share');
+  const totCh=rows.reduce((s,r)=>s+r.chiller,0);
+  const totCHWP=rows.reduce((s,r)=>s+r.chwp,0);
+  const totCWP=rows.reduce((s,r)=>s+r.cwp,0);
+  const totCT=rows.reduce((s,r)=>s+r.ct,0);
+  const totAux=rows.reduce((s,r)=>s+r.aux,0);
+  charts['plant-share']=new Chart(document.getElementById('chart-plant-share').getContext('2d'),{
+    type:'doughnut',data:{labels:['Chiller','CHWP','CWP','CT','Aux'],datasets:[{data:[totCh,totCHWP,totCWP,totCT,totAux].map(v=>+v.toFixed(0)),backgroundColor:['#0a3d7c','#1a5fa3','#2d8a4e','#3cb87a','#d97706'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:'#4a5568',font:{size:12},padding:14,boxWidth:14}},tooltip:{callbacks:{label:c=>c.label+': '+fmtNum(c.raw)+' kWh'}}}}
+  });
 
   // Daily chart
-  destroyChart('daily');
-  charts['daily']=new Chart(document.getElementById('chart-daily').getContext('2d'),{
-    type:'bar',data:{labels:rows.map(r=>{const d=new Date((r.dateSerial-25569)*86400000);return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});}),datasets:[
-      {label:'Cooling Load (TRh)',data:rows.map(r=>r.cooling),backgroundColor:'rgba(59,130,246,.5)',borderRadius:2,yAxisID:'y'},
-      {label:'Plant Power (kWh)',data:rows.map(r=>r.totalPlant),type:'line',borderColor:'#2d8a4e',pointRadius:0,borderWidth:1.5,fill:false,yAxisID:'y2'},
+  const sorted=rows.slice().sort((a,b)=>a.dateSerial-b.dateSerial);
+  destroyChart('load');
+  charts['load']=new Chart(document.getElementById('chart-load').getContext('2d'),{
+    type:'bar',data:{labels:sorted.map(r=>{const d=new Date((r.dateSerial-25569)*86400000);return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});}),datasets:[
+      {label:'Cooling Load (TRh)',data:sorted.map(r=>+r.cooling.toFixed(1)),backgroundColor:'rgba(59,130,246,.65)',borderRadius:3,yAxisID:'y'},
+      {label:'Total Plant (kWh)',data:sorted.map(r=>+r.totalPlant.toFixed(1)),type:'line',borderColor:'#06b6d4',backgroundColor:'rgba(6,182,212,.08)',pointRadius:2,borderWidth:2,fill:true,tension:.3,yAxisID:'y2'},
     ]},options:chartOpts({y:'TRh',y2:'kWh',y2right:true})
   });
 }
@@ -2818,51 +2885,76 @@ function renderMonthly(){
 function renderYearly(){
   const byPeriod={};
   for(const d of filteredData){
-    if(!byPeriod[d.period])byPeriod[d.period]={period:d.period,billing:[],metrics:d.metrics};
+    if(!byPeriod[d.period])byPeriod[d.period]={period:d.period,billing:[],metrics:{}};
     byPeriod[d.period].billing.push(...d.billing);
+    const m=d.metrics;const bm=byPeriod[d.period].metrics;
+    bm.rns=(bm.rns||0)+m.rns;bm.maxRns=(bm.maxRns||0)+m.maxRns;bm.totalElec=(bm.totalElec||0)+m.totalElec;
+    bm.oldEff=m.oldEff||bm.oldEff;bm.emissionFactor=m.emissionFactor||bm.emissionFactor;
   }
-  const periods=Object.values(byPeriod).sort((a,b)=>a.period.localeCompare(b.period));
+  const periods=Object.values(byPeriod).filter(p=>p.period&&p.period!=='—').sort((a,b)=>a.period.localeCompare(b.period));
   if(!periods.length)return;
-  const allRows=filteredData.flatMap(d=>d.billing);
-  const tc=allRows.reduce((s,r)=>s+r.cooling,0);
-  const tp=allRows.reduce((s,r)=>s+r.totalPlant,0);
-  const avgEff=tc>0?tp/tc:0;
-  const oldEff=filteredData[0]?.metrics?.oldEff||0;
-  const avgSaving=oldEff>0?((oldEff-avgEff)/oldEff*100):0;
-  const tes=Math.max(0,(oldEff-avgEff)*tc);
-  const tco2=tes*(filteredData[0]?.metrics?.emissionFactor||0.84)/1000;
+
+  const _allB=periods.flatMap(p=>p.billing);
+  const _tC=_allB.reduce((s,r)=>s+r.cooling,0);
+  const _tP=_allB.reduce((s,r)=>s+r.totalPlant,0);
+  const avgEff=_tC>0?_tP/_tC:0;
+  const oldEff=periods[0]?.metrics.oldEff||1.69;
+  const avgSavingsPct=oldEff>0?Math.round((1-avgEff/oldEff)*100):0;
+  const totElecSavings=Math.max(0,(oldEff-avgEff)*_tC);
+  const co2=totElecSavings*(periods[0]?.metrics.emissionFactor||0.84)/1000;
 
   document.getElementById('kpi-yearly').innerHTML=
     '<div class="kpi"><div class="kpi-label">Old System Eff.</div><div class="kpi-value warn">'+fmt4(oldEff)+'</div><div class="kpi-unit">kW/TR</div></div>'+
     '<div class="kpi"><div class="kpi-label">Avg Plant Eff.</div><div class="kpi-value purple">'+fmt4(avgEff)+'</div><div class="kpi-unit">kW/TR</div></div>'+
-    '<div class="kpi"><div class="kpi-label">Average Saving</div><div class="kpi-value green">'+fmt4(avgSaving)+' %</div><div class="kpi-unit">vs old system</div></div>'+
-    '<div class="kpi"><div class="kpi-label">Total Cooling</div><div class="kpi-value blue">'+fmtNum(tc)+'</div><div class="kpi-unit">TRh</div></div>'+
-    '<div class="kpi"><div class="kpi-label">Total Elec Savings</div><div class="kpi-value green">'+fmtNum(tes)+'</div><div class="kpi-unit">kWh</div></div>'+
-    '<div class="kpi"><div class="kpi-label">Total Carbon Savings</div><div class="kpi-value green">'+fmt4(tco2)+'</div><div class="kpi-unit">Tons CO₂e</div></div>';
+    '<div class="kpi"><div class="kpi-label">Avg Saving</div><div class="kpi-value green">'+avgSavingsPct+' %</div><div class="kpi-unit">vs old system</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Total Cooling</div><div class="kpi-value blue">'+fmt4(_tC)+'</div><div class="kpi-unit">TRh</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Total Elec Savings</div><div class="kpi-value green">'+fmt4(totElecSavings)+'</div><div class="kpi-unit">kWh</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Total Carbon Savings</div><div class="kpi-value green">'+fmt4(co2)+'</div><div class="kpi-unit">Tons CO₂e</div></div>';
 
   const labels=periods.map(p=>periodLabel(p.period)||p.period);
-  destroyChart('yearly-trend');
-  charts['yearly-trend']=new Chart(document.getElementById('chart-yearly-trend').getContext('2d'),{
+
+  // RNS + Electricity
+  destroyChart('yearly-rns');
+  charts['yearly-rns']=new Chart(document.getElementById('chart-yearly-rns').getContext('2d'),{
     type:'bar',data:{labels,datasets:[
-      {label:'Cooling Load (TRh)',data:periods.map(p=>Math.round(p.billing.reduce((s,r)=>s+r.cooling,0))),backgroundColor:'rgba(59,130,246,.5)',borderRadius:3,yAxisID:'y'},
-      {label:'Plant Eff (kW/TR)',data:periods.map(p=>{const b=p.billing;const tc2=b.reduce((s,r)=>s+r.cooling,0);const tp2=b.reduce((s,r)=>s+r.totalPlant,0);return tc2>0?+(tp2/tc2).toFixed(4):0;}),type:'line',borderColor:'#2d8a4e',pointRadius:4,borderWidth:2,fill:false,yAxisID:'y2'},
+      {label:'RNS',data:periods.map(p=>p.metrics.rns||0),backgroundColor:'rgba(59,130,246,.65)',borderRadius:3,yAxisID:'y'},
+      {label:'Total Electricity (kWh)',data:periods.map(p=>p.metrics.totalElec||0),type:'line',borderColor:'#10b981',pointRadius:3,borderWidth:2,fill:false,yAxisID:'y2'},
+    ]},options:chartOpts({y:'RNS',y2:'kWh',y2right:true})
+  });
+
+  // Cooling + efficiencies
+  destroyChart('yearly-load');
+  charts['yearly-load']=new Chart(document.getElementById('chart-yearly-load').getContext('2d'),{
+    type:'bar',data:{labels,datasets:[
+      {label:'Cooling Load (TRh)',data:periods.map(p=>+p.billing.reduce((s,r)=>s+r.cooling,0).toFixed(0)),backgroundColor:'rgba(59,130,246,.5)',borderRadius:3,yAxisID:'y'},
+      {label:'Plant Eff (kW/TR)',data:periods.map(p=>{const b=p.billing;const tc=b.reduce((s,r)=>s+r.cooling,0);const tp=b.reduce((s,r)=>s+r.totalPlant,0);return tc>0?+(tp/tc).toFixed(4):0}),type:'line',borderColor:'#10b981',pointRadius:4,borderWidth:2,fill:false,yAxisID:'y2'},
+      {label:'Chiller Eff (kW/TR)',data:periods.map(p=>{const b=p.billing;return b.length?+(b.reduce((s,r)=>s+r.chillerEff,0)/b.length).toFixed(4):0}),type:'line',borderColor:'#f59e0b',pointRadius:4,borderWidth:2,fill:false,yAxisID:'y2'},
     ]},options:chartOpts({y:'TRh',y2:'kW/TR',y2right:true})
   });
 
-  destroyChart('yearly-elec');
-  charts['yearly-elec']=new Chart(document.getElementById('chart-yearly-elec').getContext('2d'),{
-    type:'bar',data:{labels,datasets:[
-      {label:'Total Electricity (kWh)',data:periods.map(p=>Math.round(p.metrics.totalElec||0)),backgroundColor:'rgba(10,61,124,.5)',borderRadius:3},
-    ]},options:chartOpts({y:'kWh'})
-  });
+  // Per room
+  destroyChart('yearly-room');
+  const hasRns=periods.some(p=>p.metrics.rns>0);
+  const roomCardEl=document.getElementById('card-yearly-room');
+  if(roomCardEl) roomCardEl.style.display=hasRns?'block':'none';
+  if(hasRns){
+    charts['yearly-room']=new Chart(document.getElementById('chart-yearly-room').getContext('2d'),{
+      type:'line',data:{labels,datasets:[
+        {label:'Cooling/Room (TRh/RNS)',data:periods.map(p=>p.metrics.rns>0?+(p.billing.reduce((s,r)=>s+r.cooling,0)/p.metrics.rns).toFixed(2):0),borderColor:'#3b82f6',pointRadius:4,borderWidth:2,fill:false},
+        {label:'Energy/Room (kWh/RNS)',data:periods.map(p=>p.metrics.rns>0?+((p.metrics.totalElec||0)/p.metrics.rns).toFixed(2):0),borderColor:'#10b981',pointRadius:4,borderWidth:2,fill:false,yAxisID:'y2'},
+      ]},options:chartOpts({y:'TRh/RNS',y2:'kWh/RNS',y2right:true})
+    });
+  }
 
   // Comments
   const comments=filteredData.flatMap(d=>d.comments||[]);
-  const sec=document.getElementById('comments-section');
   const cl=document.getElementById('comments-list');
-  if(comments.length&&sec&&cl){
-    sec.style.display='block';
-    cl.innerHTML=comments.map(c=>'<p style="margin-bottom:10px;padding-left:10px;border-left:3px solid var(--ses-green)">— '+c.text+'</p>').join('');
+  if(cl){
+    if(comments.length){
+      cl.innerHTML=comments.map(c=>'<div style="margin-bottom:6px;padding:8px 12px;background:#eef1f6;border-radius:6px;border-left:3px solid var(--ses-green)">— '+c.text+'</div>').join('');
+    } else {
+      cl.innerHTML='<div style="color:var(--muted)">No comments found in loaded files.</div>';
+    }
   }
 }
 

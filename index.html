@@ -2754,11 +2754,11 @@ function renderMonthly(){
   const totalCooling=rows.reduce((s,r)=>s+r.cooling,0);
   const totalPlant=rows.reduce((s,r)=>s+r.totalPlant,0);
   const totalChiller=rows.reduce((s,r)=>s+r.chiller,0);
-  const totalElecSavings=rows.reduce((s,r)=>s+r.elecSavings,0);
-  const totalCO2=rows.reduce((s,r)=>s+r.co2,0);
   const plantEff=totalCooling>0?totalPlant/totalCooling:0;
   const metrics=filteredData.length>0?filteredData[filteredData.length-1].metrics:{};
-  const trees=Math.round(totalCO2*50000);
+  const totalElecSavings=Math.max(0,((metrics.oldEff||0)-plantEff)*totalCooling);
+  const totalCO2=totalElecSavings*(metrics.emissionFactor||0.84)/1000;
+  const trees=Math.round(totalCO2*50);
   const coolingPerRoom=metrics.rns>0?totalCooling/metrics.rns:0;
   const energyPerRoom=metrics.rns>0&&metrics.totalElec>0?metrics.totalElec/metrics.rns:0;
 
@@ -2826,11 +2826,11 @@ function renderYearly(){
   const allRows=filteredData.flatMap(d=>d.billing);
   const tc=allRows.reduce((s,r)=>s+r.cooling,0);
   const tp=allRows.reduce((s,r)=>s+r.totalPlant,0);
-  const tes=allRows.reduce((s,r)=>s+r.elecSavings,0);
-  const tco2=allRows.reduce((s,r)=>s+r.co2,0);
   const avgEff=tc>0?tp/tc:0;
   const oldEff=filteredData[0]?.metrics?.oldEff||0;
   const avgSaving=oldEff>0?((oldEff-avgEff)/oldEff*100):0;
+  const tes=Math.max(0,(oldEff-avgEff)*tc);
+  const tco2=tes*(filteredData[0]?.metrics?.emissionFactor||0.84)/1000;
 
   document.getElementById('kpi-yearly').innerHTML=
     '<div class="kpi"><div class="kpi-label">Old System Eff.</div><div class="kpi-value warn">'+fmt4(oldEff)+'</div><div class="kpi-unit">kW/TR</div></div>'+
